@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#162e42" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="GCF Maticmatic" />
+    <title>Gospel of Christ Fellowship Maticmatic | Inc</title>
+
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', Arial, sans-serif;
+            color: #1e293b;
+            background-color: #ffffff;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* --- PARTICLE CANVASES --- */
+        #bgParticles {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        #clickParticles {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9998;
+            pointer-events: none;
+        }
+
+        /* --- 0-100% OPENING LOADER (2.5 SECONDS) --- */
+        .loader-screen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #102332, #1b364d);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 24px;
+            text-align: center;
+            transition: opacity 0.45s ease, visibility 0.45s ease;
+        }
+
+        .loader-screen.done {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        body.skip-loader .loader-screen {
+            display: none !important;
+        }
+
+        .loader-cross {
+            font-size: 2.8rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            color: #e2e8f0;
+            animation: pulseCross 1.6s ease-in-out infinite;
+        }
+
+        .loader-church {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin: 0 0 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .loader-sub {
+            font-size: 0.85rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin: 0 0 24px;
+        }
+
+        .loader-percent {
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #f8fafc;
+            margin-bottom: 12px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .loader-bar-track {
+            width: 260px;
+            max-width: 85vw;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.16);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .loader-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #93c5fd, #ffffff);
+            border-radius: 999px;
+        }
+
+        /* --- HERO SECTION & TOP NAVBAR --- */
+        .hero {
+            position: relative;
+            min-height: 600px;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-image:
+                linear-gradient(95deg, rgba(16, 35, 50, 0.92) 0%, rgba(22, 46, 66, 0.72) 52%, rgba(22, 46, 66, 0.35) 100%),
+                url('https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1800&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .navbar {
+            position: relative;
+            z-index: 5;
+            max-width: 1180px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            color: #ffffff;
+        }
+
+        .brand-cross {
+            width: 28px;
+            height: 40px;
+            flex-shrink: 0;
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .brand-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            line-height: 1.1;
+        }
+
+        .brand-subtitle {
+            font-size: 0.72rem;
+            letter-spacing: 2.8px;
+            color: #cbd5e1;
+            margin-top: 2px;
+        }
+
+        .brand-tagline {
+            font-size: 0.56rem;
+            letter-spacing: 1.4px;
+            color: #94a3b8;
+            margin-top: 4px;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #e2e8f0;
+            text-decoration: none;
+            font-size: 0.76rem;
+            font-weight: 600;
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: #ffffff;
+        }
+
+        .nav-links a.nav-pill {
+            border: 1.5px solid rgba(255, 255, 255, 0.75);
+            padding: 9px 20px;
+            border-radius: 999px;
+            color: #ffffff;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-links a.nav-pill:hover {
+            background: #ffffff;
+            color: #162e42;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 5;
+            max-width: 1180px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 36px 32px 88px;
+            text-align: left;
+        }
+
+        .hero-inner {
+            max-width: 560px;
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(2.4rem, 5vw, 3.65rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin: 0 0 18px;
+            color: #ffffff;
+        }
+
+        .hero p {
+            font-size: 1.08rem;
+            color: #e2e8f0;
+            margin: 0 0 28px;
+            line-height: 1.55;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .btn-outline-pill,
+        .btn-app-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 26px;
+            border: 1.5px solid rgba(255, 255, 255, 0.85);
+            border-radius: 999px;
+            color: #ffffff;
+            text-decoration: none;
+            font-family: inherit;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            background: rgba(16, 35, 50, 0.45);
+            backdrop-filter: blur(4px);
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+
+        .btn-outline-pill:hover,
+        .btn-app-action:hover {
+            background: #ffffff;
+            color: #162e42;
+            transform: translateY(-2px);
+        }
+
+        .watch-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            color: #f8fafc;
+            text-decoration: none;
+            font-size: 0.76rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            opacity: 0.92;
+            transition: opacity 0.2s ease;
+        }
+
+        .watch-link:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+
+        /* --- TODAY'S SCHEDULE & UPDATES BANNER --- */
+        .pulse-banner {
+            position: relative;
+            z-index: 3;
+            background: #f1f5f9;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 18px 32px;
+        }
+
+        .pulse-inner {
+            max-width: 1060px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .pulse-badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            background: #162e42;
+            color: #ffffff;
+            padding: 4px 10px;
+            border-radius: 999px;
+            margin-right: 10px;
+        }
+
+        .pulse-text {
+            font-size: 0.95rem;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        .pulse-link {
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: #162e42;
+            text-decoration: none;
+        }
+
+        .pulse-link:hover {
+            text-decoration: underline;
+        }
+
+        /* --- 3-COLUMN PILLARS SECTION --- */
+        .pillars-section {
+            position: relative;
+            z-index: 3;
+            background: #ffffff;
+            padding: 72px 32px;
+        }
+
+        .pillars-grid {
+            max-width: 1060px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            text-align: center;
+        }
+
+        .pillar-item {
+            padding: 8px 14px;
+        }
+
+        .pillar-icon {
+            width: 44px;
+            height: 44px;
+            margin: 0 auto 16px;
+            color: #1b364d;
+        }
+
+        .pillar-item h3 {
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+            color: #162e42;
+            margin: 0 0 8px;
+        }
+
+        .pillar-item p {
+            font-size: 0.92rem;
+            color: #475569;
+            margin: 0;
+            line-height: 1.55;
+        }
+
+        /* --- FOOTER --- */
+        .site-footer {
+            position: relative;
+            z-index: 3;
+            background: #162e42;
+            color: #ffffff;
+            padding: 44px 32px;
+        }
+
+        .footer-grid {
+            max-width: 1080px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1fr auto;
+            gap: 28px;
+            align-items: center;
+            text-align: left;
+        }
+
+        .footer-motto {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.45rem;
+            line-height: 1.25;
+            margin: 0;
+            color: #ffffff;
+        }
+
+        .footer-col-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #f8fafc;
+            margin: 0 0 4px;
+        }
+
+        .footer-col-sub {
+            font-size: 0.74rem;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: #cbd5e1;
+            margin: 0;
+        }
+
+        @keyframes pulseCross {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @media (max-width: 820px) {
+            .footer-grid {
+                grid-template-columns: 1fr;
+                text-align: left;
+            }
+            .navbar {
+                padding: 20px;
+            }
+            .hero-content {
+                padding: 28px 20px 64px;
+            }
+            .pulse-banner {
+                padding: 16px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        (function () {
+            try {
+                if (sessionStorage.getItem("gcfmm_skip_loader") === "1") {
+                    sessionStorage.removeItem("gcfmm_skip_loader");
+                    document.body.classList.add("skip-loader");
+                }
+            } catch (e) {}
+        })();
+    </script>
+
+    <canvas id="bgParticles"></canvas>
+    <canvas id="clickParticles"></canvas>
+
+    <div class="loader-screen" id="loaderScreen">
+        <div class="loader-cross">✝</div>
+        <p class="loader-church">Gospel of Christ Fellowship</p>
+        <p class="loader-sub">Maticmatic, Sta. Barbara, Pangasinan</p>
+        <div class="loader-percent" id="loaderPercent">0%</div>
+        <div class="loader-bar-track">
+            <div class="loader-bar-fill" id="loaderBarFill"></div>
+        </div>
+    </div>
+
+    <header class="hero">
+        <nav class="navbar">
+            <a class="brand" href="index.html">
+                <svg class="brand-cross" viewBox="0 0 32 48" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="16" y1="2" x2="16" y2="46" />
+                    <line x1="5" y1="14" x2="27" y2="14" />
+                </svg>
+                <div class="brand-text">
+                    <span class="brand-title">Gospel Of Christ MaticMatic Inc</span>
+                    <span class="brand-subtitle">CHURCH</span>
+                    <span class="brand-tagline">For People. For Jesus. For Maticmatic.</span>
+                </div>
+            </a>
+
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="events.html">Events</a>
+                <a href="location.html">Location</a>
+                <a href="https://www.facebook.com/gcfmm2023" target="_blank" rel="noopener noreferrer">Facebook</a>
+                <a class="nav-pill" href="location.html">Plan a Visit →</a>
+            </div>
+        </nav>
+
+        <div class="hero-content">
+            <div class="hero-inner">
+                <h1>Jesus changes everything</h1>
+                <p>Hope for today. Purpose for life. You are all welcome to Gospel of Christ Fellowship Maticmatic.</p>
+
+                <div class="hero-actions">
+                    <a class="btn-outline-pill" href="events.html">
+                        14th Anniversary • Dec 20 <span>→</span>
+                    </a>
+                    <button type="button" class="btn-app-action" id="installAppBtn" hidden>
+                        Install Church App
+                    </button>
+                    <button type="button" class="btn-app-action" id="notifyBtn">
+                        Enable Event Alerts
+                    </button>
+                    <a class="watch-link" href="https://www.facebook.com/gcfmm2023" target="_blank" rel="noopener noreferrer">
+                        <span>●</span> Visit Our Facebook Page
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="pulse-banner" aria-label="Today's Schedule and Updates">
+        <div class="pulse-inner">
+            <div>
+                <span class="pulse-badge" id="todayBadge">Today</span>
+                <span class="pulse-text" id="todayScheduleText">Checking today's fellowship schedule...</span>
+            </div>
+            <a class="pulse-link" href="events.html">All Events &amp; Updates →</a>
+        </div>
+    </section>
+
+    <section class="pillars-section">
+        <div class="pillars-grid">
+            <div class="pillar-item">
+                <svg class="pillar-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M24 6v6M21 9h6" />
+                    <path d="M12 24l12-10 12 10" />
+                    <path d="M15 22v18h18V22" />
+                    <path d="M21 40V30h6v10" />
+                </svg>
+                <h3>A Place to Belong</h3>
+                <p>Find community, grow in faith, and discover your purpose in Christ.</p>
+            </div>
+
+            <div class="pillar-item">
+                <svg class="pillar-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="24" cy="17" r="4" />
+                    <circle cx="14" cy="20" r="3.2" />
+                    <circle cx="34" cy="20" r="3.2" />
+                    <path d="M16 34c0-4.4 3.6-8 8-8s8 3.6 8 8" />
+                    <path d="M8 35c0-3.3 2.7-6 6-6" />
+                    <path d="M40 35c0-3.3-2.7-6-6-6" />
+                </svg>
+                <h3>Together in Faith</h3>
+                <p>We're better together. Life and worship are meant to be shared.</p>
+            </div>
+
+            <div class="pillar-item">
+                <svg class="pillar-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M24 39s-13-8.4-13-18a7.5 7.5 0 0 1 13-5.1A7.5 7.5 0 0 1 37 21c0 9.6-13 18-13 18z" />
+                    <path d="M24 18v10M20 22h8" />
+                </svg>
+                <h3>Making a Difference</h3>
+                <p>Serving Sta. Barbara and sharing God's love with every family.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="footer-grid">
+            <div>
+                <p class="footer-motto">Faith. Hope.<br />Love. Together.</p>
+            </div>
+
+            <div>
+                <p class="footer-col-title">Sundays 8:30 AM</p>
+                <p class="footer-col-sub">Tue Prayer • Thu Midweek 7:00 PM</p>
+            </div>
+
+            <div>
+                <p class="footer-col-title">Gospel Of Christ MaticMatic Inc</p>
+                <p class="footer-col-sub">Maticmatic, Sta. Barbara, Pangasinan</p>
+            </div>
+
+            <div>
+                <p class="footer-col-title">Page Views</p>
+                <a href="https://librecounter.org/" target="_blank" rel="noopener noreferrer">
+                    <img
+                        src="https://librecounter.org/white-yellow.svg"
+                        referrerpolicy="unsafe-url"
+                        alt="Visitor counter"
+                        style="height: 28px; vertical-align: middle;"
+                    />
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function startLoader() {
+            const percentEl = document.getElementById("loaderPercent");
+            const barFillEl = document.getElementById("loaderBarFill");
+            const loaderScreen = document.getElementById("loaderScreen");
+
+            if (!loaderScreen) return;
+
+            if (document.body.classList.contains("skip-loader")) {
+                loaderScreen.style.display = "none";
+                return;
+            }
+
+            let finished = false;
+            const duration = 2500;
+            const startTime = performance.now();
+
+            function finishLoader() {
+                if (finished) return;
+                finished = true;
+
+                if (percentEl) percentEl.textContent = "100%";
+                if (barFillEl) barFillEl.style.width = "100%";
+
+                loaderScreen.classList.add("done");
+                setTimeout(function () {
+                    loaderScreen.style.display = "none";
+                }, 500);
+            }
+
+            function updateProgress(now) {
+                if (finished) return;
+                const elapsed = now - startTime;
+                const progress = Math.min(100, Math.floor((elapsed / duration) * 100));
+
+                if (percentEl) percentEl.textContent = progress + "%";
+                if (barFillEl) barFillEl.style.width = progress + "%";
+
+                if (elapsed < duration) {
+                    requestAnimationFrame(updateProgress);
+                } else {
+                    finishLoader();
+                }
+            }
+
+            requestAnimationFrame(updateProgress);
+            setTimeout(finishLoader, duration + 600);
+        }
+
+        function initBackgroundParticles() {
+            const canvas = document.getElementById("bgParticles");
+            if (!canvas || !canvas.getContext) return;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) return;
+
+            function resize() {
+                canvas.width = window.innerWidth || 800;
+                canvas.height = window.innerHeight || 600;
+            }
+            resize();
+            window.addEventListener("resize", resize);
+
+            const colors = [
+                "rgba(27, 54, 77, 0.14)",
+                "rgba(59, 110, 140, 0.14)",
+                "rgba(255, 255, 255, 0.25)",
+                "rgba(147, 197, 253, 0.2)"
+            ];
+
+            const count = Math.min(45, Math.floor((canvas.width * canvas.height) / 22000));
+            const circles = Array.from({ length: Math.max(18, count) }, function (_, idx) {
+                return {
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: 3 + Math.random() * 5.5,
+                    vx: (Math.random() - 0.5) * 0.65,
+                    vy: (Math.random() - 0.5) * 0.65,
+                    ring: idx % 4 === 0,
+                    color: colors[Math.floor(Math.random() * colors.length)]
+                };
+            });
+
+            function drawBg() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = 0; i < circles.length; i++) {
+                    const c = circles[i];
+                    c.x += c.vx;
+                    c.y += c.vy;
+
+                    if (c.x < -c.r * 2) c.x = canvas.width + c.r * 2;
+                    if (c.x > canvas.width + c.r * 2) c.x = -c.r * 2;
+                    if (c.y < -c.r * 2) c.y = canvas.height + c.r * 2;
+                    if (c.y > canvas.height + c.r * 2) c.y = -c.r * 2;
+
+                    ctx.beginPath();
+                    ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+                    if (c.ring) {
+                        ctx.strokeStyle = c.color;
+                        ctx.lineWidth = 1.5;
+                        ctx.stroke();
+                    } else {
+                        ctx.fillStyle = c.color;
+                        ctx.fill();
+                    }
+                }
+
+                requestAnimationFrame(drawBg);
+            }
+
+            requestAnimationFrame(drawBg);
+        }
+
+        function initClickParticles() {
+            const canvas = document.getElementById("clickParticles");
+            if (!canvas || !canvas.getContext) return;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) return;
+
+            function resize() {
+                canvas.width = window.innerWidth || 800;
+                canvas.height = window.innerHeight || 600;
+            }
+            resize();
+            window.addEventListener("resize", resize);
+
+            const burstColors = ["#162e42", "#3b6e8c", "#93c5fd", "#ffffff"];
+            const pops = [];
+
+            function spawnPop(x, y) {
+                const count = 18;
+                for (let i = 0; i < count; i++) {
+                    const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.25;
+                    const speed = 2.2 + Math.random() * 4.2;
+                    pops.push({
+                        x: x,
+                        y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        r: 3 + Math.random() * 4.5,
+                        alpha: 1,
+                        color: burstColors[Math.floor(Math.random() * burstColors.length)]
+                    });
+                }
+            }
+
+            function drawPops() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = pops.length - 1; i >= 0; i--) {
+                    const p = pops[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vx *= 0.96;
+                    p.vy *= 0.96;
+                    p.r *= 0.96;
+                    p.alpha -= 0.03;
+
+                    if (p.alpha <= 0.02 || p.r < 0.5) {
+                        pops.splice(i, 1);
+                        continue;
+                    }
+
+                    ctx.save();
+                    ctx.globalAlpha = Math.max(0, p.alpha);
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                requestAnimationFrame(drawPops);
+            }
+
+            requestAnimationFrame(drawPops);
+
+            document.querySelectorAll("a").forEach(function (link) {
+                link.addEventListener("click", function (e) {
+                    const rect = link.getBoundingClientRect();
+                    const x = e.clientX || (rect.left + rect.width / 2);
+                    const y = e.clientY || (rect.top + rect.height / 2);
+                    spawnPop(x, y);
+
+                    const href = link.getAttribute("href");
+                    const opensNewTab = link.getAttribute("target") === "_blank";
+                    const isSameTabPage = href && !href.startsWith("#") && !opensNewTab;
+
+                    if (isSameTabPage) {
+                        e.preventDefault();
+                        setTimeout(function () {
+                            window.location.href = href;
+                        }, 260);
+                    }
+                });
+            });
+        }
+
+        function initDailySchedule() {
+            const badgeEl = document.getElementById("todayBadge");
+            const textEl = document.getElementById("todayScheduleText");
+            if (!badgeEl || !textEl) return;
+
+            const day = new Date().getDay();
+            const messages = {
+                0: { badge: "Today • Sunday", text: "Sunday Worship Service at 8:30 AM — See you at church!" },
+                1: { badge: "Coming Up", text: "Tuesday Prayer Meeting is tomorrow — Next service: Sunday 8:30 AM." },
+                2: { badge: "Today • Tuesday", text: "Prayer Meeting today — Next major gathering: Thursday Midweek 7:00 PM." },
+                3: { badge: "Coming Up", text: "Thursday Midweek Service is tomorrow at 7:00 PM." },
+                4: { badge: "Today • Thursday", text: "Midweek Service tonight at 7:00 PM — Next: Sunday 8:30 AM." },
+                5: { badge: "Weekend Ahead", text: "Get ready for Sunday Worship Service at 8:30 AM!" },
+                6: { badge: "Tomorrow • Sunday", text: "Sunday Worship Service tomorrow at 8:30 AM • 14th Anniversary on Dec 20." }
+            };
+
+            const current = messages[day] || messages[0];
+            badgeEl.textContent = current.badge;
+            textEl.textContent = current.text;
+        }
+
+        function initPwaFeatures() {
+            if ("serviceWorker" in navigator) {
+                window.addEventListener("load", function () {
+                    navigator.serviceWorker.register("sw.js").catch(function (err) {
+                        console.error("Service worker registration failed:", err);
+                    });
+                });
+            }
+
+            let deferredPrompt = null;
+            const installBtn = document.getElementById("installAppBtn");
+
+            window.addEventListener("beforeinstallprompt", function (e) {
+                e.preventDefault();
+                deferredPrompt = e;
+                if (installBtn) installBtn.hidden = false;
+            });
+
+            if (installBtn) {
+                installBtn.addEventListener("click", async function () {
+                    if (!deferredPrompt) return;
+                    deferredPrompt.prompt();
+                    await deferredPrompt.userChoice;
+                    deferredPrompt = null;
+                    installBtn.hidden = true;
+                });
+            }
+
+            const notifyBtn = document.getElementById("notifyBtn");
+            if (notifyBtn) {
+                if (!("Notification" in window)) {
+                    notifyBtn.textContent = "Alerts via Add to Home Screen";
+                } else if (Notification.permission === "granted") {
+                    notifyBtn.textContent = "Event Alerts Enabled ✓";
+                }
+
+                notifyBtn.addEventListener("click", async function () {
+                    if (!("Notification" in window)) {
+                        alert("On iPhone/iPad, tap Share → Add to Home Screen first to use the app.");
+                        return;
+                    }
+                    const permission = await Notification.requestPermission();
+                    if (permission === "granted") {
+                        notifyBtn.textContent = "Event Alerts Enabled ✓";
+                        if (navigator.serviceWorker.ready) {
+                            const reg = await navigator.serviceWorker.ready;
+                            reg.showNotification("GCF Maticmatic App", {
+                                body: "Event alerts are active! Sundays 8:30 AM • Tue Prayer • Thu Midweek 7:00 PM.",
+                                icon: "icons/icon-192.png"
+                            });
+                        }
+                    } else {
+                        alert("Notifications were not enabled. You can allow them anytime in your browser settings.");
+                    }
+                });
+            }
+        }
+
+        function initAll() {
+            try { startLoader(); } catch (e) { console.error(e); }
+            try { initBackgroundParticles(); } catch (e) { console.error(e); }
+            try { initClickParticles(); } catch (e) { console.error(e); }
+            try { initDailySchedule(); } catch (e) { console.error(e); }
+            try { initPwaFeatures(); } catch (e) { console.error(e); }
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", initAll);
+        } else {
+            initAll();
+        }
+    </script>
+</body>
+</html>
